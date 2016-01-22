@@ -7,21 +7,21 @@ module Docsplit
     # Burst a list of pdfs into single pages, as `pdfname_pagenumber.pdf`.
     def extract(pdfs, opts)
       extract_options opts
-
       [pdfs].flatten.each do |pdf|
         pdf_name = File.basename(pdf, File.extname(pdf))
-        page_path = ESCAPE[File.join(@output, "#{pdf_name}")] + "_%d.pdf"
+        if opts[:chunk]
+          page_path = opts[:chunk].nil? ? ESCAPE[File.join(@output, "#{pdf_name}")] + "_%d.pdf" : ESCAPE[File.join(@output, "#{pdf_name}")] + "_#{}.pdf"
+        else
+          page_text = opts[:pages].first.to_s+'-'+opts[:pages].last.to_s
+          page_path = ESCAPE[File.join(@output, "#{pdf_name}")] + "_#{page_text}.pdf"
+        end
+
         FileUtils.mkdir_p @output unless File.exists?(@output)
         
         cmd = if DEPENDENCIES[:pdftailor] # prefer pdftailor, but keep pdftk for backwards compatability
           "pdftailor unstitch --output #{page_path} #{ESCAPE[pdf]} 2>&1"
         else
-          if opts[:chunk]
-            page_text = opts[:pages].first.to_s+'-'+opts[:pages].last.to_s
-            "pdftk A=#{ESCAPE[pdf]} cat A#{page_text} output #{page_path}"
-          else
-            "pdftk #{ESCAPE[pdf]} burst output #{page_path} 2>&1"
-          end
+          opts[:chunk] ? "pdftk A=#{ESCAPE[pdf]} cat A#{page_text} output #{page_path}" : "pdftk #{ESCAPE[pdf]} burst output #{page_path} 2>&1"
         end
         result = `#{cmd}`.chomp
         FileUtils.rm('doc_data.txt') if File.exists?('doc_data.txt')
