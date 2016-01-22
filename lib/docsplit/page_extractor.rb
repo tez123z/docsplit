@@ -9,7 +9,7 @@ module Docsplit
       extract_options opts
       
       if opts[:chunk]
-        page_text = opts[:pages].first.to_s+'-'opts[:pages].last.to_s
+        page_text = opts[:pages].first.to_s+'-'+opts[:pages].last.to_s
         cmd = "pdftk A=#{ESCAPE[pdf]} cat A#{page_text} output #{page_path}"
         result = `#{cmd}`.chomp
         FileUtils.rm('doc_data.txt') if File.exists?('doc_data.txt')
