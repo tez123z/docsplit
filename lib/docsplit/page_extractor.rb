@@ -16,7 +16,7 @@ module Docsplit
           "pdftailor unstitch --output #{page_path} #{ESCAPE[pdf]} 2>&1"
         else
           if opts[:chunk] && opts[:pages]
-            page_text = opts[:chunk].first.to_s+'-'opts[:chunk].last.to_s
+            page_text = opts[:pages].first.to_s+'-'opts[:pages].last.to_s
             "pdftk A=#{ESCAPE[pdf]} cat A#{page_text} output #{page_path}"
           else
             "pdftk #{ESCAPE[pdf]} burst output #{page_path} 2>&1"
