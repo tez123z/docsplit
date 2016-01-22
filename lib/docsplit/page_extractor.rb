@@ -15,7 +15,12 @@ module Docsplit
         cmd = if DEPENDENCIES[:pdftailor] # prefer pdftailor, but keep pdftk for backwards compatability
           "pdftailor unstitch --output #{page_path} #{ESCAPE[pdf]} 2>&1"
         else
-          "pdftk #{ESCAPE[pdf]} burst output #{page_path} 2>&1"
+          if opts[:chunk] && opts[:pages]
+            page_text = opts[:chunk].first.to_s+'-'opts[:chunk].last.to_s
+            "pdftk A=#{ESCAPE[pdf]} cat A#{page_text} output #{page_path}"
+          else
+            "pdftk #{ESCAPE[pdf]} burst output #{page_path} 2>&1"
+          end
         end
         result = `#{cmd}`.chomp
         FileUtils.rm('doc_data.txt') if File.exists?('doc_data.txt')
